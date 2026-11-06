@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "A3DatNHPCE191354 - Hotel Booking API",
+    "description": "Run customer and staff login first to populate collection token variables. Dates and IDs are examples and should match your local data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "customerToken", "value": "" },
+    { "key": "staffToken", "value": "" },
+    { "key": "customerId", "value": "1" },
+    { "key": "roomTypeId", "value": "1" },
+    { "key": "roomId", "value": "1" },
+    { "key": "bookingId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        { "name": "Search rooms", "request": { "method": "GET", "url": "{{baseUrl}}/api/rooms?search=&page=0&size=10" } },
+        { "name": "Room details", "request": { "method": "GET", "url": "{{baseUrl}}/api/rooms/{{roomId}}" } },
+        { "name": "Room types", "request": { "method": "GET", "url": "{{baseUrl}}/api/room-types" } }
+      ]
+    },
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerFullName\": \"Nguyen Van A\",\n  \"telephone\": \"0901234567\",\n  \"emailAddress\": \"customer@example.com\",\n  \"customerBirthday\": \"2000-05-20\",\n  \"password\": \"Password123!\"\n}" },
+            "url": "{{baseUrl}}/api/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201 || pm.response.code === 200) pm.collectionVariables.set('customerId', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Customer login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"Password123!\"\n}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) pm.collectionVariables.set('customerToken', pm.response.json().token);"] } }]
+        },
+        {
+          "name": "Staff login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"staff@hotel.local\",\n  \"password\": \"Staff@12345\"\n}" },
+            "url": "{{baseUrl}}/api/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) pm.collectionVariables.set('staffToken', pm.response.json().token);"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{customerToken}}", "type": "string" }] },
+      "item": [
+        { "name": "My profile", "request": { "method": "GET", "url": "{{baseUrl}}/api/customers/me" } },
+        {
+          "name": "Update my profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerFullName\": \"Nguyen Van A\",\n  \"telephone\": \"0901234567\",\n  \"emailAddress\": \"customer@example.com\",\n  \"customerBirthday\": \"2000-05-20\"\n}" },
+            "url": "{{baseUrl}}/api/customers/me"
+          }
+        },
+        {
+          "name": "Book one or more rooms",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rooms\": [\n    { \"roomId\": {{roomId}}, \"startDate\": \"2026-12-10\", \"endDate\": \"2026-12-12\" }\n  ]\n}" },
+            "url": "{{baseUrl}}/api/bookings/me"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201 || pm.response.code === 200) pm.collectionVariables.set('bookingId', pm.response.json().id);"] } }]
+        },
+        { "name": "My booking history", "request": { "method": "GET", "url": "{{baseUrl}}/api/bookings/me" } }
+      ]
+    },
+    {
+      "name": "Staff",
+      "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{staffToken}}", "type": "string" }] },
+      "item": [
+        { "name": "Search customers", "request": { "method": "GET", "url": "{{baseUrl}}/api/staff/customers?search=" } },
+        { "name": "List rooms", "request": { "method": "GET", "url": "{{baseUrl}}/api/staff/rooms?search=" } },
+        {
+          "name": "Create room type",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roomTypeName\": \"Deluxe\",\n  \"typeDescription\": \"A larger room\",\n  \"typeNote\": \"Non-smoking\"\n}" },
+            "url": "{{baseUrl}}/api/staff/room-types"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201 || pm.response.code === 200) pm.collectionVariables.set('roomTypeId', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Create room",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"roomNumber\": \"A101\",\n  \"roomDetailDescription\": \"Deluxe room\",\n  \"roomMaxCapacity\": 2,\n  \"roomTypeId\": {{roomTypeId}},\n  \"roomStatus\": \"ACTIVE\",\n  \"roomPricePerDay\": 850000\n}" },
+            "url": "{{baseUrl}}/api/staff/rooms"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201 || pm.response.code === 200) pm.collectionVariables.set('roomId', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Create booking for customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"customerId\": {{customerId}},\n  \"rooms\": [\n    { \"roomId\": {{roomId}}, \"startDate\": \"2026-12-15\", \"endDate\": \"2026-12-17\" }\n  ]\n}" },
+            "url": "{{baseUrl}}/api/staff/bookings"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201 || pm.response.code === 200) pm.collectionVariables.set('bookingId', pm.response.json().id);"] } }]
+        },
+        { "name": "List bookings and details", "request": { "method": "GET", "url": "{{baseUrl}}/api/staff/bookings" } },
+        {
+          "name": "Update booking status",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"bookingStatus\": \"CONFIRMED\" }" },
+            "url": "{{baseUrl}}/api/staff/bookings/{{bookingId}}"
+          }
+        },
+        { "name": "Delete room safely", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/staff/rooms/{{roomId}}" } }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+# Java / Maven
+backend/target/
+backend/.m2/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.log
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+application-local.properties
+application-prod.properties
+
+# IDE / operating system
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Test output
+coverage/
+*.exec
